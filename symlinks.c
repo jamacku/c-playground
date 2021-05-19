@@ -6,10 +6,24 @@
 
 #include <getopt.h>
 
+#include <fcntl.h>          /* Definition of AT_* constants */    
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#define DIRECTORY_A "/symlinks/etc/init.d/A"
+#define DIRECTORY_B "/symlinks/etc/init.d/B"
+
 int main(int argc, char *argv[]) {
     char *root_path;
+
+    // getopt stuff
     int option;
     int digit_optind = 0;
+
+    struct stat st = {0};
+
+    int counter = 0;
 
     // Example of use: ./symlinks --root "/home/dummy" foo.original bar.symlink
 
@@ -32,6 +46,7 @@ int main(int argc, char *argv[]) {
         switch (option) {
             case 'h':
                 printf("Usage: %s [-r|--root <path>] <file> <symlink>\n", argv[0]);
+                counter = 2;
                 break;
 
             case 'r':
@@ -45,17 +60,36 @@ int main(int argc, char *argv[]) {
     }
 
     if (optind < argc) {
-            printf("non-option ARGV-elements: ");
-            while (optind < argc)
-                printf("%s ", argv[optind++]);
-            printf("\n");
+        printf("non-option ARGV-elements: ");
+        while (optind < argc) {
+            printf("%s ", argv[optind++]);
+            counter++;
         }
+        printf("\n");
+    }
 
-    exit(EXIT_SUCCESS);
-
+    if (counter < 2) {
+        printf("E: Missing parameters, please see --help\n");
+        exit(EXIT_FAILURE);
+    }
 
     // TODO: Deal with --root value
 
-    // TODO: Symlink stuff
+    // https://man7.org/linux/man-pages/man3/dirfd.3.html
 
+    // TODO: Create directories
+
+    /*if (stat(DIRECTORY_A, &st) == -1) {
+        mkdirat(DIRECTORY_A, 0700);
+    }
+
+    if (stat(DIRECTORY_B, &st) == -1) {
+        mkdir(DIRECTORY_B, 0700);
+    }*/
+
+    // TODO: Create file
+
+    // TODO: Create symlink
+
+    exit(EXIT_SUCCESS);
 }
