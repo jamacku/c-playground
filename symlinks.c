@@ -14,10 +14,24 @@
 
 #include <dirent.h>
 
-#define DIRECTORY_A "/symlinks/etc/init.d/A"
-#define DIRECTORY_B "/symlinks/etc/init.d/B"
+#define HOST_DIRECTORY "symlinks"
+#define DIRECTORY_A "A"
+#define DIRECTORY_B "B"
 
-#define DEFAULT_ROOT_PATH "/"
+#define DEFAULT_ROOT_PATH "/tmp"        /* /tmp for testing purposes */
+
+int create_directory(char* root_path, int fd_directory, const char* r_directory_path) {
+    struct stat st = {0};
+
+    if (fstatat(fd_directory, r_directory_path, &st, 0) == -1) {
+        if (mkdirat(fd_directory, r_directory_path, 0777) == -1) {
+            printf ("E %d: Cannot create directory: \"%s%s\"\n", errno, root_path, r_directory_path);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    return(EXIT_SUCCESS);
+}
 
 int main(int argc, char *argv[]) {
     char *root_path = DEFAULT_ROOT_PATH;
@@ -26,12 +40,11 @@ int main(int argc, char *argv[]) {
     int option;
     int digit_optind = 0;
 
-    struct stat st = {0};
-
     int counter = 0;
 
     // dir stuff
     DIR *p_root_path;
+    int fd_root_path;
 
     // Example of use: ./symlinks --root "/home/dummy" foo.original bar.symlink
 
@@ -83,6 +96,7 @@ int main(int argc, char *argv[]) {
 
     /**
      * Deal with root_path
+     * open its directory and gets fd
      */
     p_root_path = opendir ((const char*)root_path);
     if (p_root_path == NULL) {
@@ -90,15 +104,18 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // TODO: Create directories
-
-    /*if (stat(DIRECTORY_A, &st) == -1) {
-        mkdirat(DIRECTORY_A, 0700);
+    fd_root_path = dirfd(p_root_path);
+    if (fd_root_path == -1) {
+        printf ("E %d: Cannot get fd for root_path directory: \"%s\"\n", errno, root_path);
+        exit(EXIT_FAILURE);
     }
 
-    if (stat(DIRECTORY_B, &st) == -1) {
-        mkdir(DIRECTORY_B, 0700);
-    }*/
+    /**
+     * Create testing directories symlinks/A and symlinks/B
+     */
+    create_directory(root_path, fd_root_path, HOST_DIRECTORY);
+    create_directory(root_path, fd_root_path, HOST_DIRECTORY "/" DIRECTORY_A);
+    create_directory(root_path, fd_root_path, HOST_DIRECTORY "/" DIRECTORY_B);
 
     // TODO: Create file
 
