@@ -11,11 +11,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <dirent.h>
+
 #define DIRECTORY_A "/symlinks/etc/init.d/A"
 #define DIRECTORY_B "/symlinks/etc/init.d/B"
 
+#define DEFAULT_ROOT_PATH "/"
+
 int main(int argc, char *argv[]) {
-    char *root_path;
+    char *root_path = DEFAULT_ROOT_PATH;
 
     // getopt stuff
     int option;
@@ -25,12 +29,15 @@ int main(int argc, char *argv[]) {
 
     int counter = 0;
 
+    // dir stuff
+    DIR *p_root_path;
+
     // Example of use: ./symlinks --root "/home/dummy" foo.original bar.symlink
 
     /**
      * Parse arguments
      * https://linux.die.net/man/3/getopt_long 
-    */
+     */
     while (1) {
         int this_option_optind = optind ? optind : 1;
         int option_index = 0;
@@ -73,9 +80,14 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // TODO: Deal with --root value
-
-    // https://man7.org/linux/man-pages/man3/dirfd.3.html
+    /**
+     * Deal with root_path
+     */
+    p_root_path = opendir ((const char*)root_path);
+    if (p_root_path == NULL) {
+        printf ("E: Cannot open root_path directory: \"%s\"\n", root_path);
+        exit(EXIT_FAILURE);
+    }
 
     // TODO: Create directories
 
@@ -90,6 +102,7 @@ int main(int argc, char *argv[]) {
     // TODO: Create file
 
     // TODO: Create symlink
-
+    
+    closedir (p_root_path);
     exit(EXIT_SUCCESS);
 }
