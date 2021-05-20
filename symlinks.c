@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include <getopt.h>
 
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
      */
     p_root_path = opendir ((const char*)root_path);
     if (p_root_path == NULL) {
-        printf ("E: Cannot open root_path directory: \"%s\"\n", root_path);
+        printf ("E %d: Cannot open root_path directory: \"%s\"\n", errno, root_path);
         exit(EXIT_FAILURE);
     }
 
