@@ -1,1 +1,2 @@
-# symlink-manipulation-playground
+# c-playground
+c-playground
